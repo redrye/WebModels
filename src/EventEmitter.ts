@@ -15,8 +15,6 @@ class EventEmitter {
 
     emit (event,...args) {
         if (this.listeners[event]) {
-            console.log(event)
-
             this.listeners[event].forEach(listener => {
                 if(listener) listener(...args)
             });

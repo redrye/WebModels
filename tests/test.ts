@@ -5,14 +5,14 @@ var model = new BaseModel({
 });
 
 model.on('saving', () => {
-    console.log('saving model');
+    console.log('saving model via callback');
 })
 
 model.on('saved', (model) => {
-    console.log(model)
-    console.log('saved model');
+    console.log('saved model via callback');
 })
 
-model.save()
+console.log(model)
 
+console.log(model.name)
 //console.log(model);

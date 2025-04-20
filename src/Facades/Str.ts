@@ -51,9 +51,28 @@ class Str  {
      * // thisIsATest
      */
     static camel = (string: string): string => this.trim(string)
+        .replace(/[_-]/g, ' ')
         .toLowerCase()
         .split(' ')
         .reduce((acc, word, i) => acc + (i === 0 ? word : this.capitalize(word)), '');
+
+    /**
+     * @function pascal
+     * @description Returns a string in camelcase after trimming it
+     * @param {String} string
+     * @return {String} The pascal case string
+     * @example
+     * camelcase(' This is a tesT ')
+     * // thisIsATest
+     * @example
+     * str(' This is a tesT ').camelcase().value
+     * // thisIsATest
+     */
+    static pascal = (string: string): string => {
+        var camelString = this.camel(string);
+        var firstChar = camelString.charAt(0);
+        return firstChar.toUpperCase() + camelString.slice(1);
+    }
 
     /**
      * @function slugify
