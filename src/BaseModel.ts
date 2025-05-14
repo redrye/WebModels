@@ -2,8 +2,9 @@ import EventEmitter from "./EventEmitter";
 import {MODEL_EVENTS} from "./Config/Model";
 import Str from "./Facades/Str";
 import EventServiceProvider from "./Providers/EventServiceProvider";
+import {IBaseModel} from "./Contracts/IBaseModel";
 
-class BaseModel {
+class BaseModel implements IBaseModel{
     has_events = true;
     emitter: EventEmitter = new EventEmitter();
     booted = false;
@@ -13,6 +14,10 @@ class BaseModel {
     constructor(attributes = {}) {
         this.bootAttributes(attributes)
         this.bootIfNotBooted()
+    }
+
+    bootIfNoteBooted(): void {
+        throw new Error("Method not implemented.");
     }
 
     /**
@@ -60,7 +65,7 @@ class BaseModel {
      *                             the getter and setter.
      */
 
-    defineSetterAndGetter = (attribute) => {
+    protected defineSetterAndGetter = (attribute) => {
         Object.defineProperty(this, attribute, {
             get: function() {
                 return this.attributes[attribute];
@@ -76,7 +81,7 @@ class BaseModel {
      *
      * @return {void} Does not return a value.
      */
-    bootIfNotBooted(): void {
+    protected bootIfNotBooted(): void {
         if(!this.booted) {
             this.boot()
         }
@@ -252,7 +257,7 @@ class BaseModel {
      * @return {Promise<void>} A promise that resolves once the save operation is complete.
      */
 
-    async save(callback) {
+    async save (callback) {
         this.fireEvent(MODEL_EVENTS.SAVING)
 
         this.fireEvent(MODEL_EVENTS.SAVED)

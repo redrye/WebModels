@@ -1,25 +1,9 @@
-import IModel from "./Contracts/IModel";
-class Model implements IModel {
+import {BaseModel} from "./index";
+class Model extends BaseModel {
     public attributes: any = {};
     constructor(attributes = {}) {
-        this.attributes = attributes;
-
-        
-    }
-
-    save() {
-
-    }
-
-    update() {
-
-    }
-
-    delete() {
-
-    }
-
-    forceDelete() {
-
+        super(attributes);
     }
 }
+
+export default Model
