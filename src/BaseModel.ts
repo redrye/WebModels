@@ -10,15 +10,12 @@ class BaseModel implements IBaseModel{
     booted = false;
     table: any = '';
     attributes = {}
-    protected original_attributes = {}
+    original_attributes = {}
     constructor(attributes = {}) {
         this.bootAttributes(attributes)
         this.bootIfNotBooted()
     }
 
-    bootIfNoteBooted(): void {
-        throw new Error("Method not implemented.");
-    }
 
     /**
      * Initializes and sets the attributes for an object. If the `attributes` key exists within the passed object,
@@ -81,7 +78,7 @@ class BaseModel implements IBaseModel{
      *
      * @return {void} Does not return a value.
      */
-    protected bootIfNotBooted(): void {
+     bootIfNotBooted(): void {
         if(!this.booted) {
             this.boot()
         }
