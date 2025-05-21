@@ -1,4 +1,13 @@
-# Model.ts
+# Upcomming Features
+
+* ### ajax endpoints with support for:
+  * ### fetch API
+  * ### jQuery
+  * ### Axios
+
+---
+
+# Model class
 
 ## Overview
 The `Model` Class provides an additional layer of abstraction on top of `BaseModel`. It integrates `EventEmitter` to support event-driven interactions within model instances. This combination allows for handling complex workflows and enabling listeners to respond to changes in the model.
