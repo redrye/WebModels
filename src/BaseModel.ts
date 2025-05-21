@@ -4,12 +4,47 @@ import Str from "./Facades/Str";
 import EventServiceProvider from "./Providers/EventServiceProvider";
 import {IBaseModel} from "./Contracts/IBaseModel";
 
-class BaseModel implements IBaseModel{
+/**
+ * The BaseModel.ts file defines a foundational class for models in the workspace.
+ * It provides essential properties and mechanisms for managing model attributes, events, and state.
+ *
+ * Usage
+ * This base model can be extended by other models to inherit its properties and event-handling capabilities.
+ * It provides a structure for managing attributes and tracking their changes, as well as emitting events when necessary.
+ *
+ * Notes
+ * - The BaseModel is designed to be generic and flexible, allowing it to be adapted to various use cases.
+ * - Additional methods and logic can be implemented to extend its functionality as needed.
+ */
+
+class BaseModel implements IBaseModel {
+
+    /**
+     * Indicates whether the model supports event handling. Default is true.
+     */
     has_events = true;
+
+    /**
+     * An instance of EventEmitter used for managing and emitting events.
+     */
     emitter: EventEmitter = new EventEmitter();
+    /**
+     * Represents whether the model has been initialized or "booted". Default is false.
+     */
     booted = false;
+    /**
+     * Stores the name of the database table associated with the model.
+     * This property is used as a part of ajax request for the endpoints
+     * Default is an empty string.
+     */
     table: any = '';
+    /**
+     * Holds the current state of the model's attributes.
+     */
     attributes = {}
+    /**
+     * Stores the original state of the model's attributes, useful for tracking changes.
+     */
     original_attributes = {}
     constructor(attributes = {}) {
         this.bootAttributes(attributes)
