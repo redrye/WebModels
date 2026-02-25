@@ -1,9 +1,6 @@
 # Upcomming Features
 
-* ### ajax endpoints with support for:
-  * ### fetch API
-  * ### jQuery
-  * ### Axios
+* ### IndexedDB intergration
 
 ---
 
