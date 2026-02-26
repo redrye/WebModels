@@ -3,6 +3,9 @@ import {MODEL_EVENTS} from "./Config/Model";
 import Str from "./Facades/Str";
 import EventServiceProvider from "./Providers/EventServiceProvider";
 import {IBaseModel} from "./Contracts/IBaseModel";
+import QueryModel from "./QueryModel";
+import QueryBuilder from "./Builders/QueryBuilder";
+import Database from "./Services/Database";
 
 /**
  * The BaseModel.ts file defines a foundational class for models in the workspace.
@@ -19,6 +22,8 @@ import {IBaseModel} from "./Contracts/IBaseModel";
 
 class BaseModel implements IBaseModel {
 
+    protected primaryKey = 'id';
+    protected db: Database;
     /**
      * Indicates whether the model supports event handling. Default is true.
      */
@@ -47,6 +52,7 @@ class BaseModel implements IBaseModel {
      */
     original_attributes = {}
     constructor(attributes = {}) {
+        this.db = Database.getInstance()
         this.bootAttributes(attributes)
         this.bootIfNotBooted()
     }
@@ -99,10 +105,10 @@ class BaseModel implements IBaseModel {
 
     protected defineSetterAndGetter = (attribute) => {
         Object.defineProperty(this, attribute, {
-            get: function() {
+            get: () => {
                 return this.attributes[attribute];
             },
-            set: function(value) {
+            set: (value) => {
                 this.attributes[attribute] = value;
             }
         })
@@ -331,8 +337,10 @@ class BaseModel implements IBaseModel {
      * @return {Promise<void>} A promise that resolves when the delete operation is complete.
      */
     async forceDelete(callback: any) {
+        var primaryKey = this.primaryKey
+        var id = this.attributes[primaryKey]
         this.fireEvent(MODEL_EVENTS.FORCE_DELETING)
-
+        await this.deleteFromDatabase(id)
         this.fireEvent(MODEL_EVENTS.FORCE_DELETED)
     }
     /**
@@ -401,6 +409,122 @@ class BaseModel implements IBaseModel {
      */
     getOriginalAttributes() {
         return this.original_attributes;
+    }
+
+    private query() {
+        return new QueryBuilder(this)
+    }
+
+    static query(): QueryBuilder {
+        return new QueryBuilder(this);
+    }
+
+    static where(field: string, operatorOrValue: any, value?: any): QueryBuilder {
+        return this.query().where(field, operatorOrValue, value);
+    }
+
+    static async all<T>(): Promise<T[]> {
+        const db = Database.getInstance().getDb();
+        return new Promise((resolve, reject) => {
+            const transaction = db.transaction(this.table, 'readonly');
+            const store = transaction.objectStore(this.table);
+            const request = store.getAll();
+
+            request.onsuccess = () => {
+                resolve(request.result);
+            };
+
+            request.onerror = () => {
+                reject(request.error);
+            };
+        });
+    }
+
+
+    static async create(data: any): Promise<any> {
+        const db = Database.getInstance().getDb();
+        return new Promise((resolve, reject) => {
+            const transaction = db.transaction(this.table, 'readwrite');
+            const store = transaction.objectStore(this.table);
+            const request = store.add(data);
+
+            request.onsuccess = () => {
+                resolve({...data, id: request.result as number});
+            };
+
+            request.onerror = () => {
+                reject(request.error);
+            };
+        });
+    }
+
+    static async update(id: number, data: any): Promise<any> {
+        const db = Database.getInstance().getDb();
+        return new Promise((resolve, reject) => {
+            const transaction = db.transaction(this.table, 'readwrite');
+            const store = transaction.objectStore(this.table);
+
+            const getRequest = store.get(id);
+
+            getRequest.onsuccess = () => {
+                const existingData = getRequest.result;
+                if (!existingData) {
+                    reject(new Error('Record not found'));
+                    return;
+                }
+
+                const updatedData = {...existingData, ...data};
+                const updateRequest = store.put(updatedData);
+
+                updateRequest.onsuccess = () => {
+                    resolve(updatedData);
+                };
+
+                updateRequest.onerror = () => {
+                    reject(updateRequest.error);
+                };
+            };
+
+            getRequest.onerror = () => {
+                reject(getRequest.error);
+            };
+        });
+    }
+
+    static async find(id: number): Promise<any> {
+        var table = Reflect.get(this, 'table')
+        const db = Database.getInstance().getDb();
+        return new Promise((resolve, reject) => {
+            const transaction = db.transaction(table, 'readonly');
+            const store = transaction.objectStore(table);
+            const request = store.get(id);
+
+            request.onsuccess = () => {
+                resolve(request.result || null);
+            };
+
+            request.onerror = () => {
+                reject(request.error);
+            };
+        });
+    }
+
+    private async forceDeleteFromDatabase(id) {
+        const db = Database.getInstance().getDb();
+        var model = true
+        return new Promise((resolve, reject) => {
+            const transaction = db.transaction(this.table, 'readwrite');
+            const store = transaction.objectStore(this.table);
+            const request = store.delete(id);
+
+            request.onsuccess = () => {
+                resolve(model);
+            };
+
+            request.onerror = () => {
+                reject(request.error);
+            };
+        });
     }
 
 
